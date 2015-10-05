@@ -1,0 +1,29 @@
+body {
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+fieldset {
+    display: inline-block;
+}
+
+#map-loader {
+    float: right;
+}
+
+#map-container {
+    margin-top: 2ex;
+}
+
+#orig-map {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    opacity: 0.7;
+}
