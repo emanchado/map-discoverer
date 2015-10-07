@@ -10,13 +10,17 @@ export class Toolbox {
         this.canvas = canvas;
         this.toolsDiv = toolsDiv;
 
-        this.tools = [];
+        this.tools = []; this.toolButtons = [];
         for (let toolClass of this.toolList) {
-            let tool = new toolClass(this.canvas);
-            this.createToolButton(tool);
+            let tool = new toolClass(this.canvas),
+                buttonEl = this.createToolButton(tool);
+
             this.tools.push(tool);
+            this.toolButtons.push(buttonEl);
+            this.toolsDiv.appendChild(buttonEl);
         }
         this.currentTool = this.tools[0];
+        this.toolButtons[0].classList.add("active");
 
         this.canvas.addEventListener("mousedown", evt => {
             this.currentTool.onStart(evt);
@@ -35,7 +39,6 @@ export class Toolbox {
             toolIconEl = document.createElement("img"),
             self = this;
 
-        buttonDomEl.id = toolClass.name.toLowerCase() + "-btn";
         toolIconEl.src = "img/" + toolClass.img;
         toolIconEl.alt = "";
 
@@ -43,8 +46,12 @@ export class Toolbox {
         buttonDomEl.appendChild(document.createTextNode(" " + toolClass.title));
         buttonDomEl.addEventListener("click", function () {
             self.currentTool = tool;
+            for (let button of self.toolButtons) {
+                button.classList.remove("active");
+            }
+            buttonDomEl.classList.add("active");
         }, false);
 
-        this.toolsDiv.appendChild(buttonDomEl);
+        return buttonDomEl;
     }
 }
