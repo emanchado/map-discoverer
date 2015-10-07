@@ -33,8 +33,9 @@ window.addEventListener("load", function(/*e*/) {
     let mapImg = document.getElementById("orig-map"),
         canvas = document.getElementById("overlay"),
         ctx = canvas.getContext('2d'),
-        toolbox = new Toolbox(canvas, [PencilTool, RectangleTool]);
+        toolbox = new Toolbox([PencilTool, RectangleTool]);
 
+    toolbox.install(canvas, document.getElementById("tools"));
     loadImage(mapImg, canvas, "img/default-map.png");
     document.getElementById("new-map-file").addEventListener("change", evt => {
         let file = evt.target.files[0];

@@ -1,11 +1,17 @@
 export class Toolbox {
-    constructor(canvas, toolList) {
-        this.canvas = canvas;
+    constructor(toolList) {
         if (!toolList.length) {
             throw new Error("Need at least one tool!");
         }
+        this.toolList = toolList;
+    }
+
+    install(canvas, toolsDiv) {
+        this.canvas = canvas;
+        this.toolsDiv = toolsDiv;
+
         this.tools = [];
-        for (let toolClass of toolList) {
+        for (let toolClass of this.toolList) {
             let tool = new toolClass(this.canvas);
             this.createToolButton(tool);
             this.tools.push(tool);
@@ -25,7 +31,6 @@ export class Toolbox {
 
     createToolButton(tool) {
         let toolClass = tool.constructor,
-            toolsDiv = document.getElementById("tools"),
             buttonDomEl = document.createElement("button"),
             toolIconEl = document.createElement("img"),
             self = this;
@@ -40,6 +45,6 @@ export class Toolbox {
             self.currentTool = tool;
         }, false);
 
-        toolsDiv.appendChild(buttonDomEl);
+        this.toolsDiv.appendChild(buttonDomEl);
     }
 }
