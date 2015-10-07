@@ -8,6 +8,7 @@
 
 import PencilTool from "tool/PencilTool";
 import RectangleTool from "tool/RectangleTool";
+import ToggleButton from "ToggleButton";
 import Toolbox from "Toolbox";
 
 function loadImage(imgEl, canvasEl, imageUrl) {
@@ -18,55 +19,48 @@ function loadImage(imgEl, canvasEl, imageUrl) {
     canvasEl.width = imgEl.width;
     let ctx = canvasEl.getContext('2d');
     ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-    ctx.globalCompositeOperation = "destination-out";
-    let showHideBtn = document.getElementById("show-hide-btn"),
-        showHideBtnText = document.getElementById("show-hide-btn-text");
-    showHideBtnText.textContent = 'Uncover Mode';
-    showHideBtn.dataset.mode = 'uncover';
-    let overlay = document.getElementById("overlay");
-    overlay.style.opacity = "";
 
     imgEl.style.visibility = "";
 }
 
 window.addEventListener("load", function(/*e*/) {
     let mapImg = document.getElementById("orig-map"),
-        canvas = document.getElementById("overlay"),
-        ctx = canvas.getContext('2d'),
+        overlay = document.getElementById("overlay"),
+        ctx = overlay.getContext('2d'),
+        toolsDiv = document.getElementById("tools"),
         toolbox = new Toolbox([PencilTool, RectangleTool]);
 
-    toolbox.install(canvas, document.getElementById("tools"));
-    loadImage(mapImg, canvas, "img/default-map.png");
+    let opacityToggle = new ToggleButton(["Toggle opacity", "Toggle opacity"],
+                                         "img/transparency.png",
+                                         function() {
+                                             overlay.style.opacity = "1";
+                                         },
+                                         function() {
+                                             overlay.style.opacity = "";
+                                         }),
+        coverToggle = new ToggleButton(["Cover Mode", "Uncover Mode"],
+                                       "img/eraser.png",
+                                       function() {
+                                           ctx.globalCompositeOperation = "source-over";
+                                       },
+                                       function() {
+                                           ctx.globalCompositeOperation = "destination-out";
+                                       });
+    toolsDiv.appendChild(opacityToggle.domElement);
+    toolsDiv.appendChild(coverToggle.domElement);
+
+    toolbox.install(overlay, toolsDiv);
+    loadImage(mapImg, overlay, "img/default-map.png");
+    opacityToggle.disable();
+    coverToggle.disable();
     document.getElementById("new-map-file").addEventListener("change", evt => {
         let file = evt.target.files[0];
         let reader = new FileReader();
         reader.onload = evt => {
-            loadImage(mapImg, canvas, evt.target.result);
+            loadImage(mapImg, overlay, evt.target.result);
+            opacityToggle.disable();
+            coverToggle.disable();
         };
         reader.readAsDataURL(file);
     }, false);
-
-    let toggleBtn = document.getElementById("toggle-transparency-btn"),
-        overlay = document.getElementById("overlay");
-    toggleBtn.addEventListener("click", function(/*e*/) {
-        if (overlay.style.opacity) {
-            overlay.style.opacity = "";
-        } else {
-            overlay.style.opacity = "1";
-        }
-    });
-
-    let showHideBtn = document.getElementById("show-hide-btn"),
-        showHideBtnText = document.getElementById("show-hide-btn-text");
-    showHideBtn.addEventListener("click", function(/*e*/) {
-        if (showHideBtn.dataset.mode === 'uncover') {
-            showHideBtnText.textContent = 'Cover Mode';
-            showHideBtn.dataset.mode = 'cover';
-            ctx.globalCompositeOperation = "source-over";
-        } else {
-            showHideBtnText.textContent = 'Uncover Mode';
-            showHideBtn.dataset.mode = 'uncover';
-            ctx.globalCompositeOperation = "destination-out";
-        }
-    });
 }, false);
