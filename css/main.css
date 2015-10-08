@@ -1,0 +1,42 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+#tools button {
+    width: 10em;
+    height: 30px;
+}
+#tools button img {
+    vertical-align: middle;
+}
+
+#map-loader {
+    float: right;
+}
+
+#map-container {
+    margin-top: 2ex;
+}
+
+#orig-map {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+#overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    opacity: 0.7;
+}
+
+button.active {
+    background-color: #666;
+    color: #ddd;
+}
+
+footer {
+    font-size: 80%;
+}
