@@ -1,11 +1,3 @@
-// In stopTool a snapshot of the current canvas would be taken, for
-// undo purposes. Add undo option.
-
-// Add UI hints, like the size of the current rectangle. Change the
-// cursor shape.
-
-// Add size of pencil.
-
 import MapDiscoverer from "MapDiscoverer";
 
 window.addEventListener("load", () => {
