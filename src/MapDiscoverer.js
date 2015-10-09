@@ -31,19 +31,21 @@ export class MapDiscoverer {
         toolsDiv.appendChild(this.coverToggle.domElement);
 
         toolbox.install(overlay, toolsDiv);
+
+        this.mapImg.addEventListener("load", () => {
+            this.canvasEl.height = this.mapImg.height;
+            this.canvasEl.width = this.mapImg.width;
+            let ctx = this.canvasEl.getContext('2d');
+            ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
+
+            this.mapImg.style.visibility = "";
+        });
         this.loadImage("img/default-map.png");
     }
 
     loadImage(imageUrl) {
         this.mapImg.style.visibility = "hidden";
         this.mapImg.src = imageUrl;
-
-        this.canvasEl.height = this.mapImg.height;
-        this.canvasEl.width = this.mapImg.width;
-        let ctx = this.canvasEl.getContext('2d');
-        ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-
-        this.mapImg.style.visibility = "";
 
         this.opacityToggle.disable();
         this.coverToggle.disable();
