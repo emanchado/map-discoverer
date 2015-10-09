@@ -36,9 +36,12 @@ var MapDiscoverer = (function () {
             _this.canvasEl.width = _this.mapImg.width;
             var ctx = _this.canvasEl.getContext('2d');
             ctx.fillRect(0, 0, _this.canvasEl.width, _this.canvasEl.height);
-
             _this.mapImg.style.visibility = "";
+
+            _this.opacityToggle.disable();
+            _this.coverToggle.disable();
         });
+
         this.loadImage("img/default-map.png");
     }
 
@@ -46,10 +49,9 @@ var MapDiscoverer = (function () {
         key: "loadImage",
         value: function loadImage(imageUrl) {
             this.mapImg.style.visibility = "hidden";
+            // Setting "src" will load the image, and the "load" event
+            // will take care of the rest
             this.mapImg.src = imageUrl;
-
-            this.opacityToggle.disable();
-            this.coverToggle.disable();
         }
     }]);
 
