@@ -21,10 +21,10 @@ export class MapDiscoverer {
                                               });
         this.coverToggle = new ToggleButton(["Cover Mode", "Uncover Mode"],
                                             "img/eraser.png",
-                                            function() {
+                                            () => {
                                                 ctx.globalCompositeOperation = "source-over";
                                             },
-                                            function() {
+                                            () => {
                                                 ctx.globalCompositeOperation = "destination-out";
                                             });
         toolsDiv.appendChild(this.opacityToggle.domElement);
@@ -37,17 +37,19 @@ export class MapDiscoverer {
             this.canvasEl.width = this.mapImg.width;
             let ctx = this.canvasEl.getContext('2d');
             ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-
             this.mapImg.style.visibility = "";
+
+            this.opacityToggle.disable();
+            this.coverToggle.disable();
         });
+
         this.loadImage("img/default-map.png");
     }
 
     loadImage(imageUrl) {
         this.mapImg.style.visibility = "hidden";
+        // Setting "src" will load the image, and the "load" event
+        // will take care of the rest
         this.mapImg.src = imageUrl;
-
-        this.opacityToggle.disable();
-        this.coverToggle.disable();
     }
 }
