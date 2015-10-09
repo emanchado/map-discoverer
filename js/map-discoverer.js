@@ -6,6 +6,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var MapDiscoverer = (function () {
     function MapDiscoverer(mapImg, toolsDiv, overlay) {
+        var _this = this;
+
         _classCallCheck(this, MapDiscoverer);
 
         this.mapImg = mapImg;
@@ -28,6 +30,15 @@ var MapDiscoverer = (function () {
         toolsDiv.appendChild(this.coverToggle.domElement);
 
         toolbox.install(overlay, toolsDiv);
+
+        this.mapImg.addEventListener("load", function () {
+            _this.canvasEl.height = _this.mapImg.height;
+            _this.canvasEl.width = _this.mapImg.width;
+            var ctx = _this.canvasEl.getContext('2d');
+            ctx.fillRect(0, 0, _this.canvasEl.width, _this.canvasEl.height);
+
+            _this.mapImg.style.visibility = "";
+        });
         this.loadImage("img/default-map.png");
     }
 
@@ -36,13 +47,6 @@ var MapDiscoverer = (function () {
         value: function loadImage(imageUrl) {
             this.mapImg.style.visibility = "hidden";
             this.mapImg.src = imageUrl;
-
-            this.canvasEl.height = this.mapImg.height;
-            this.canvasEl.width = this.mapImg.width;
-            var ctx = this.canvasEl.getContext('2d');
-            ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-
-            this.mapImg.style.visibility = "";
 
             this.opacityToggle.disable();
             this.coverToggle.disable();
@@ -229,14 +233,6 @@ var Toolbox = (function () {
 
     return Toolbox;
 })();
-// In stopTool a snapshot of the current canvas would be taken, for
-// undo purposes. Add undo option.
-
-// Add UI hints, like the size of the current rectangle. Change the
-// cursor shape.
-
-// Add size of pencil.
-
 "use strict";
 
 window.addEventListener("load", function () {
