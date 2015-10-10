@@ -17,6 +17,9 @@ export class PencilTool {
                      false);
         this.ctx.fill();
         this.ctx.closePath();
+
+        this.lastX = offsetX;
+        this.lastY = offsetY;
     }
 
     onMove({offsetX, offsetY}) {
@@ -24,16 +27,16 @@ export class PencilTool {
             return;
         }
 
-        this.ctx.fillStyle = "rgba(0,0,0,1)";
+        this.ctx.lineCap = 'round';
+        this.ctx.lineWidth = 40;
         this.ctx.beginPath();
-        this.ctx.arc(offsetX,
-                     offsetY,
-                     20,
-                     (Math.PI/180)*0,
-                     (Math.PI/180)*360,
-                     false);
-        this.ctx.fill();
+        this.ctx.moveTo(this.lastX, this.lastY);
+        this.ctx.lineTo(offsetX, offsetY);
+        this.ctx.stroke();
         this.ctx.closePath();
+
+        this.lastX = offsetX;
+        this.lastY = offsetY;
     }
 
     onStop(/*evt*/) {
