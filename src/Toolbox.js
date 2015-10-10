@@ -21,16 +21,6 @@ export class Toolbox {
         }
         this.currentTool = this.tools[0];
         this.toolButtons[0].classList.add("active");
-
-        this.canvas.addEventListener("mousedown", evt => {
-            this.currentTool.onStart(evt);
-        }, false);
-        this.canvas.addEventListener("mouseup", evt => {
-            this.currentTool.onStop(evt);
-        }, false);
-        this.canvas.addEventListener("mousemove", evt => {
-            this.currentTool.onMove(evt);
-        }, false);
     }
 
     createToolButton(tool) {

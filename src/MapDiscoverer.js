@@ -7,43 +7,108 @@ export class MapDiscoverer {
     constructor(mapImg, toolsDiv, overlay) {
         this.mapImg = mapImg;
         this.canvasEl = overlay;
+        this.undoActions = [];
+        this.stateIndex = -1;
 
-        let ctx = overlay.getContext('2d'),
-            toolbox = new Toolbox([PencilTool, RectangleTool]);
+        let ctx = this.canvasEl.getContext("2d"),
+            undoButton = this.createButton("Undo", "img/undo.png", () => {
+                if (this.stateIndex > 0) {
+                    this.stateIndex--;
+                    ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
+                }
+            }),
+            redoButton = this.createButton("Redo", "img/redo.png", () => {
+                if (this.stateIndex + 1 < this.undoActions.length) {
+                    this.stateIndex++;
+                    ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
+                }
+            });
+        this.toolbox = new Toolbox([PencilTool, RectangleTool]);
+        this.opacityToggle = this.createOpacityToggleButton();
+        this.coverToggle = this.createCoverToggleButton();
 
-        this.opacityToggle = new ToggleButton(["Toggle opacity", "Toggle opacity"],
-                                              "img/transparency.png",
-                                              function() {
-                                                  overlay.style.opacity = "1";
-                                              },
-                                              function() {
-                                                  overlay.style.opacity = "";
-                                              });
-        this.coverToggle = new ToggleButton(["Cover Mode", "Uncover Mode"],
-                                            "img/eraser.png",
-                                            () => {
-                                                ctx.globalCompositeOperation = "source-over";
-                                            },
-                                            () => {
-                                                ctx.globalCompositeOperation = "destination-out";
-                                            });
         toolsDiv.appendChild(this.opacityToggle.domElement);
         toolsDiv.appendChild(this.coverToggle.domElement);
+        toolsDiv.appendChild(undoButton);
+        toolsDiv.appendChild(redoButton);
+        this.toolbox.install(this.canvasEl, toolsDiv);
 
-        toolbox.install(overlay, toolsDiv);
+        this.addCanvasHandlers(this.canvasEl);
+        this.addImageLoadHandler(this.mapImg);
+        this.loadImage("img/default-map.png");
+    }
 
-        this.mapImg.addEventListener("load", () => {
-            this.canvasEl.height = this.mapImg.height;
-            this.canvasEl.width = this.mapImg.width;
-            let ctx = this.canvasEl.getContext('2d');
+    createOpacityToggleButton() {
+        return new ToggleButton(["Toggle opacity", "Toggle opacity"],
+                                "img/transparency.png",
+                                () => {
+                                    this.canvasEl.style.opacity = "1";
+                                },
+                                () => {
+                                    this.canvasEl.style.opacity = "";
+                                });
+    }
+
+    createCoverToggleButton() {
+        let ctx = this.canvasEl.getContext("2d");
+
+        return new ToggleButton(
+            ["Cover Mode", "Uncover Mode"],
+            "img/eraser.png",
+            () => {
+                ctx.globalCompositeOperation = "source-over";
+            },
+            () => {
+                ctx.globalCompositeOperation = "destination-out";
+            }
+        );
+    }
+
+    createButton(title, iconUrl, functionality) {
+        let button = document.createElement("button"),
+            buttonImg = document.createElement("img");
+        buttonImg.src = iconUrl;
+        button.appendChild(buttonImg);
+        button.appendChild(document.createTextNode(" " + title));
+        button.addEventListener("click", functionality);
+        return button;
+    }
+
+    addCanvasHandlers(canvasEl) {
+        let ctx = this.canvasEl.getContext("2d");
+
+        canvasEl.addEventListener("mousedown", evt => {
+            this.toolbox.currentTool.onStart(evt);
+        }, false);
+        canvasEl.addEventListener("mouseup", evt => {
+            this.toolbox.currentTool.onStop(evt);
+            // Take a snapshot of the canvasEl, for undo purposes
+            this.stateIndex++;
+            this.undoActions = this.undoActions.slice(0, this.stateIndex);
+            this.undoActions[this.stateIndex] =
+                ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+        }, false);
+        canvasEl.addEventListener("mousemove", evt => {
+            this.toolbox.currentTool.onMove(evt);
+        }, false);
+    }
+
+    addImageLoadHandler(imgEl) {
+        imgEl.addEventListener("load", () => {
+            this.canvasEl.height = imgEl.height;
+            this.canvasEl.width = imgEl.width;
+            let ctx = this.canvasEl.getContext("2d");
             ctx.fillRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-            this.mapImg.style.visibility = "";
+            this.stateIndex = 0;
+            this.undoActions = [ctx.getImageData(0,
+                                                 0,
+                                                 this.canvasEl.width,
+                                                 this.canvasEl.height)];
+            imgEl.style.visibility = "";
 
             this.opacityToggle.disable();
             this.coverToggle.disable();
         });
-
-        this.loadImage("img/default-map.png");
     }
 
     loadImage(imageUrl) {
