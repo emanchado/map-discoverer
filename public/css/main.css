@@ -30,6 +30,8 @@ body {
     left: 0;
 
     opacity: 0.7;
+
+    cursor: crosshair;
 }
 
 button.active {

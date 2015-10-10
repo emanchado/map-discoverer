@@ -10,6 +10,7 @@ export class RectangleTool {
     onMove(/*evt*/) {}
 
     onStop({offsetX, offsetY}) {
+        this.ctx.lineWidth = 1;
         this.ctx.beginPath();
         this.ctx.rect(this.initialX, this.initialY,
                       offsetX - this.initialX, offsetY - this.initialY);

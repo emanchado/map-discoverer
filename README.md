@@ -19,6 +19,5 @@ online](http://emanchado.github.io/map-discoverer).
 TODO
 ----
 
-* Add UI hints, like the size of the current rectangle. Change the
-  cursor shape.
+* Add UI hints, like the size of the current rectangle.
 * Add size of pencil.
