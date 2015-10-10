@@ -5,13 +5,14 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MapDiscoverer = (function () {
-    function MapDiscoverer(mapImg, toolsDiv, overlay) {
+    function MapDiscoverer(mapImg, toolsDiv, overlay, uiHintsOverlay) {
         var _this = this;
 
         _classCallCheck(this, MapDiscoverer);
 
         this.mapImg = mapImg;
         this.canvasEl = overlay;
+        this.uiHintsEl = uiHintsOverlay;
         this.undoActions = [];
         this.stateIndex = -1;
 
@@ -36,7 +37,7 @@ var MapDiscoverer = (function () {
         toolsDiv.appendChild(this.coverToggle.domElement);
         toolsDiv.appendChild(undoButton);
         toolsDiv.appendChild(redoButton);
-        this.toolbox.install(this.canvasEl, toolsDiv);
+        this.toolbox.install(this.canvasEl, this.uiHintsEl, toolsDiv);
 
         this.addCanvasHandlers(this.canvasEl);
         this.addImageLoadHandler(this.mapImg);
@@ -107,6 +108,12 @@ var MapDiscoverer = (function () {
                 _this4.canvasEl.width = imgEl.width;
                 var ctx = _this4.canvasEl.getContext("2d");
                 ctx.fillRect(0, 0, _this4.canvasEl.width, _this4.canvasEl.height);
+
+                _this4.uiHintsEl.height = imgEl.height;
+                _this4.uiHintsEl.width = imgEl.width;
+                var uiHintsCtx = _this4.uiHintsEl.getContext("2d");
+                uiHintsCtx.clearRect(0, 0, _this4.uiHintsEl.width, _this4.uiHintsEl.height);
+
                 _this4.stateIndex = 0;
                 _this4.undoActions = [ctx.getImageData(0, 0, _this4.canvasEl.width, _this4.canvasEl.height)];
                 imgEl.style.visibility = "";
@@ -206,8 +213,9 @@ var Toolbox = (function () {
 
     _createClass(Toolbox, [{
         key: "install",
-        value: function install(canvas, toolsDiv) {
+        value: function install(canvas, uiHints, toolsDiv) {
             this.canvas = canvas;
+            this.uiHints = uiHints;
             this.toolsDiv = toolsDiv;
 
             this.tools = [];this.toolButtons = [];
@@ -219,7 +227,7 @@ var Toolbox = (function () {
                 for (var _iterator = this.toolList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
                     var toolClass = _step.value;
 
-                    var tool = new toolClass(this.canvas),
+                    var tool = new toolClass(this.canvas, this.uiHints),
                         buttonEl = this.createToolButton(tool);
 
                     this.tools.push(tool);
@@ -296,7 +304,7 @@ var Toolbox = (function () {
 "use strict";
 
 window.addEventListener("load", function () {
-    var app = new MapDiscoverer(document.getElementById("orig-map"), document.getElementById("tools"), document.getElementById("overlay"));
+    var app = new MapDiscoverer(document.getElementById("orig-map"), document.getElementById("tools"), document.getElementById("overlay"), document.getElementById("ui-hints"));
 
     document.getElementById("new-map-file").addEventListener("change", function (evt) {
         var file = evt.target.files[0];
@@ -314,7 +322,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var PencilTool = (function () {
-    function PencilTool(canvas) {
+    function PencilTool(canvas /*, uiHintsLayer*/) {
         _classCallCheck(this, PencilTool);
 
         this.ctx = canvas.getContext('2d');
@@ -378,10 +386,13 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var RectangleTool = (function () {
-    function RectangleTool(canvas) {
+    function RectangleTool(canvas, uiHintsLayer) {
         _classCallCheck(this, RectangleTool);
 
-        this.ctx = canvas.getContext('2d');
+        this.ctx = canvas.getContext("2d");
+        this.uiHintsLayer = uiHintsLayer;
+        this.uiHintsLayerCtx = uiHintsLayer.getContext("2d");
+        this.started = false;
     }
 
     _createClass(RectangleTool, [{
@@ -392,21 +403,44 @@ var RectangleTool = (function () {
             var _ref2 = [offsetX, offsetY];
             this.initialX = _ref2[0];
             this.initialY = _ref2[1];
+
+            this.started = true;
         }
     }, {
         key: "onMove",
-        value: function onMove() /*evt*/{}
-    }, {
-        key: "onStop",
-        value: function onStop(_ref3) {
+        value: function onMove(_ref3) {
             var offsetX = _ref3.offsetX;
             var offsetY = _ref3.offsetY;
+
+            if (this.started) {
+                var origStrokeStyle = this.uiHintsLayerCtx.strokeStyle;
+
+                this.uiHintsLayerCtx.strokeStyle = "blue";
+
+                this.uiHintsLayerCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
+                this.uiHintsLayerCtx.lineWidth = 1;
+                this.uiHintsLayerCtx.beginPath();
+                this.uiHintsLayerCtx.rect(this.initialX, this.initialY, offsetX - this.initialX, offsetY - this.initialY);
+                this.uiHintsLayerCtx.stroke();
+
+                this.uiHintsLayerCtx.strokeStyle = origStrokeStyle;
+            }
+        }
+    }, {
+        key: "onStop",
+        value: function onStop(_ref4) {
+            var offsetX = _ref4.offsetX;
+            var offsetY = _ref4.offsetY;
+
+            this.uiHintsLayerCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
 
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
             this.ctx.rect(this.initialX, this.initialY, offsetX - this.initialX, offsetY - this.initialY);
             this.ctx.fill();
             this.ctx.stroke();
+
+            this.started = false;
         }
     }]);
 
