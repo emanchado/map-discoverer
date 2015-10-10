@@ -19,5 +19,4 @@ online](http://emanchado.github.io/map-discoverer).
 TODO
 ----
 
-* Add UI hints, like the size of the current rectangle.
-* Add size of pencil.
+* Allow changing the size of pencil?
