@@ -1,5 +1,5 @@
 export class PencilTool {
-    constructor(canvas) {
+    constructor(canvas/*, uiHintsLayer*/) {
         this.ctx = canvas.getContext('2d');
         this.started = false;
     }

@@ -6,13 +6,14 @@ export class Toolbox {
         this.toolList = toolList;
     }
 
-    install(canvas, toolsDiv) {
+    install(canvas, uiHints, toolsDiv) {
         this.canvas = canvas;
+        this.uiHints = uiHints;
         this.toolsDiv = toolsDiv;
 
         this.tools = []; this.toolButtons = [];
         for (let toolClass of this.toolList) {
-            let tool = new toolClass(this.canvas),
+            let tool = new toolClass(this.canvas, this.uiHints),
                 buttonEl = this.createToolButton(tool);
 
             this.tools.push(tool);
