@@ -33,6 +33,7 @@ export class Toolbox {
         toolIconEl.src = "img/" + toolClass.img;
         toolIconEl.alt = "";
 
+        buttonDomEl.accessKey = toolClass.accessKey;
         buttonDomEl.appendChild(toolIconEl);
         buttonDomEl.appendChild(document.createTextNode(" " + toolClass.title));
         buttonDomEl.addEventListener("click", () => {

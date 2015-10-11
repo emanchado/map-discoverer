@@ -1,5 +1,5 @@
 export class ToggleButton {
-    constructor([titleDisabled, titleEnabled], imageUrl, enableF, disableF) {
+    constructor([titleDisabled, titleEnabled], imageUrl, accessKey, enableF, disableF) {
         this.titleEnabled = titleEnabled;
         this.titleDisabled = titleDisabled;
         this.enableFunction = enableF;
@@ -9,6 +9,7 @@ export class ToggleButton {
 
         let buttonImage = document.createElement("img");
         buttonImage.src = imageUrl;
+        this.domElement.accessKey = accessKey;
         this.domElement.dataset.enabled = "false";
         this.domElement.appendChild(buttonImage);
         this.domElement.appendChild(this.buttonText);

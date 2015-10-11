@@ -69,3 +69,4 @@ export class PencilTool {
 }
 PencilTool.title = "Pencil Tool";
 PencilTool.img = "pencil.png";
+PencilTool.accessKey = "p";

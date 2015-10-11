@@ -11,23 +11,14 @@ export class MapDiscoverer {
         this.undoActions = [];
         this.stateIndex = -1;
 
-        let ctx = this.canvasEl.getContext("2d"),
-            undoButton = this.createButton("Undo", "img/undo.png", () => {
-                if (this.stateIndex > 0) {
-                    this.stateIndex--;
-                    ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
-                }
-            }),
-            redoButton = this.createButton("Redo", "img/redo.png", () => {
-                if (this.stateIndex + 1 < this.undoActions.length) {
-                    this.stateIndex++;
-                    ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
-                }
-            });
-        this.toolbox = new Toolbox([PencilTool, RectangleTool]);
+        // Create buttons
+        let undoButton = this.createUndoButton(),
+            redoButton = this.createRedoButton();
         this.opacityToggle = this.createOpacityToggleButton();
         this.coverToggle = this.createCoverToggleButton();
+        this.toolbox = new Toolbox([PencilTool, RectangleTool]);
 
+        // Add buttons to the UI
         toolsDiv.appendChild(this.opacityToggle.domElement);
         toolsDiv.appendChild(this.coverToggle.domElement);
         toolsDiv.appendChild(undoButton);
@@ -36,12 +27,36 @@ export class MapDiscoverer {
 
         this.addCanvasHandlers(this.canvasEl);
         this.addImageLoadHandler(this.mapImg);
+
         this.loadImage("img/default-map.png");
+    }
+
+    createUndoButton() {
+        let ctx = this.canvasEl.getContext("2d");
+
+        return this.createButton("Undo", "img/undo.png", "z", () => {
+            if (this.stateIndex > 0) {
+                this.stateIndex--;
+                ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
+            }
+        });
+    }
+
+    createRedoButton() {
+        let ctx = this.canvasEl.getContext("2d");
+
+        return this.createButton("Redo", "img/redo.png", "y", () => {
+            if (this.stateIndex + 1 < this.undoActions.length) {
+                this.stateIndex++;
+                ctx.putImageData(this.undoActions[this.stateIndex], 0, 0);
+            }
+        });
     }
 
     createOpacityToggleButton() {
         return new ToggleButton(["Toggle opacity", "Toggle opacity"],
                                 "img/transparency.png",
+                                "o",
                                 () => {
                                     this.canvasEl.style.opacity = "1";
                                 },
@@ -56,6 +71,7 @@ export class MapDiscoverer {
         return new ToggleButton(
             ["Uncover Mode", "Cover Mode"],
             "img/eraser.png",
+            "c",
             () => {
                 ctx.globalCompositeOperation = "source-over";
             },
@@ -65,12 +81,13 @@ export class MapDiscoverer {
         );
     }
 
-    createButton(title, iconUrl, functionality) {
+    createButton(title, iconUrl, accessKey, functionality) {
         let button = document.createElement("button"),
             buttonImg = document.createElement("img");
         buttonImg.src = iconUrl;
         button.appendChild(buttonImg);
         button.appendChild(document.createTextNode(" " + title));
+        button.accessKey = accessKey;
         button.addEventListener("click", functionality);
         return button;
     }

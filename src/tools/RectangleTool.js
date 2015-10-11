@@ -52,3 +52,4 @@ export class RectangleTool {
 }
 RectangleTool.title = "Rectangle Tool";
 RectangleTool.img = "rectangle.png";
+RectangleTool.accessKey = "r";
