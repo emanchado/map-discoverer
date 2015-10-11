@@ -76,7 +76,8 @@ export class MapDiscoverer {
     }
 
     addCanvasHandlers(canvasEl) {
-        let ctx = this.canvasEl.getContext("2d");
+        let ctx = this.canvasEl.getContext("2d"),
+            uiHintsCtx = this.uiHintsEl.getContext("2d");
 
         canvasEl.addEventListener("mousedown", evt => {
             this.toolbox.currentTool.onStart(evt);
@@ -92,6 +93,12 @@ export class MapDiscoverer {
         canvasEl.addEventListener("mousemove", evt => {
             this.toolbox.currentTool.onMove(evt);
         }, false);
+        canvasEl.addEventListener("mouseout", () => {
+            uiHintsCtx.clearRect(0,
+                                 0,
+                                 this.uiHintsEl.width,
+                                 this.uiHintsEl.height);
+        });
     }
 
     addImageLoadHandler(imgEl) {

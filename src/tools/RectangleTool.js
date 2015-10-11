@@ -17,10 +17,7 @@ export class RectangleTool {
 
             this.uiHintsLayerCtx.strokeStyle = "blue";
 
-            this.uiHintsLayerCtx.clearRect(0,
-                                           0,
-                                           this.uiHintsLayer.width,
-                                           this.uiHintsLayer.height);
+            this.clearUiHints();
             this.uiHintsLayerCtx.lineWidth = 1;
             this.uiHintsLayerCtx.beginPath();
             this.uiHintsLayerCtx.rect(this.initialX, this.initialY,
@@ -32,10 +29,7 @@ export class RectangleTool {
     }
 
     onStop({offsetX, offsetY}) {
-        this.uiHintsLayerCtx.clearRect(0,
-                                       0,
-                                       this.uiHintsLayer.width,
-                                       this.uiHintsLayer.height);
+        this.clearUiHints();
 
         this.ctx.lineWidth = 1;
         this.ctx.beginPath();
@@ -45,6 +39,13 @@ export class RectangleTool {
         this.ctx.stroke();
 
         this.started = false;
+    }
+
+    clearUiHints() {
+        this.uiHintsLayerCtx.clearRect(0,
+                                       0,
+                                       this.uiHintsLayer.width,
+                                       this.uiHintsLayer.height);
     }
 }
 RectangleTool.title = "Rectangle Tool";
