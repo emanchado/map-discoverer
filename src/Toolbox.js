@@ -35,7 +35,9 @@ export class Toolbox {
 
         buttonDomEl.appendChild(toolIconEl);
         buttonDomEl.appendChild(document.createTextNode(" " + toolClass.title));
-        buttonDomEl.addEventListener("click", function () {
+        buttonDomEl.addEventListener("click", () => {
+            let uiHintsCtx = this.uiHints.getContext("2d");
+            uiHintsCtx.clearRect(0, 0, this.uiHints.width, this.uiHints.height);
             self.currentTool = tool;
             for (let button of self.toolButtons) {
                 button.classList.remove("active");

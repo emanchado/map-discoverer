@@ -8,16 +8,18 @@ export class RectangleTool {
 
     onStart({offsetX, offsetY}) {
         [this.initialX, this.initialY] = [offsetX, offsetY];
+        this.clearUiHints();
         this.started = true;
     }
 
     onMove({offsetX, offsetY}) {
+        this.clearUiHints();
+
         if (this.started) {
             let origStrokeStyle = this.uiHintsLayerCtx.strokeStyle;
 
             this.uiHintsLayerCtx.strokeStyle = "blue";
 
-            this.clearUiHints();
             this.uiHintsLayerCtx.lineWidth = 1;
             this.uiHintsLayerCtx.beginPath();
             this.uiHintsLayerCtx.rect(this.initialX, this.initialY,
