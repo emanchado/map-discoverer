@@ -54,7 +54,7 @@ export class MapDiscoverer {
         let ctx = this.canvasEl.getContext("2d");
 
         return new ToggleButton(
-            ["Cover Mode", "Uncover Mode"],
+            ["Uncover Mode", "Cover Mode"],
             "img/eraser.png",
             () => {
                 ctx.globalCompositeOperation = "source-over";
