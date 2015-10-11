@@ -6,8 +6,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var MapDiscoverer = (function () {
     function MapDiscoverer(mapImg, toolsDiv, overlay, uiHintsOverlay) {
-        var _this = this;
-
         _classCallCheck(this, MapDiscoverer);
 
         this.mapImg = mapImg;
@@ -16,23 +14,14 @@ var MapDiscoverer = (function () {
         this.undoActions = [];
         this.stateIndex = -1;
 
-        var ctx = this.canvasEl.getContext("2d"),
-            undoButton = this.createButton("Undo", "img/undo.png", function () {
-            if (_this.stateIndex > 0) {
-                _this.stateIndex--;
-                ctx.putImageData(_this.undoActions[_this.stateIndex], 0, 0);
-            }
-        }),
-            redoButton = this.createButton("Redo", "img/redo.png", function () {
-            if (_this.stateIndex + 1 < _this.undoActions.length) {
-                _this.stateIndex++;
-                ctx.putImageData(_this.undoActions[_this.stateIndex], 0, 0);
-            }
-        });
-        this.toolbox = new Toolbox([PencilTool, RectangleTool]);
+        // Create buttons
+        var undoButton = this.createUndoButton(),
+            redoButton = this.createRedoButton();
         this.opacityToggle = this.createOpacityToggleButton();
         this.coverToggle = this.createCoverToggleButton();
+        this.toolbox = new Toolbox([PencilTool, RectangleTool]);
 
+        // Add buttons to the UI
         toolsDiv.appendChild(this.opacityToggle.domElement);
         toolsDiv.appendChild(this.coverToggle.domElement);
         toolsDiv.appendChild(undoButton);
@@ -41,18 +30,47 @@ var MapDiscoverer = (function () {
 
         this.addCanvasHandlers(this.canvasEl);
         this.addImageLoadHandler(this.mapImg);
+
         this.loadImage("img/default-map.png");
     }
 
     _createClass(MapDiscoverer, [{
-        key: "createOpacityToggleButton",
-        value: function createOpacityToggleButton() {
+        key: "createUndoButton",
+        value: function createUndoButton() {
+            var _this = this;
+
+            var ctx = this.canvasEl.getContext("2d");
+
+            return this.createButton("Undo", "img/undo.png", "z", function () {
+                if (_this.stateIndex > 0) {
+                    _this.stateIndex--;
+                    ctx.putImageData(_this.undoActions[_this.stateIndex], 0, 0);
+                }
+            });
+        }
+    }, {
+        key: "createRedoButton",
+        value: function createRedoButton() {
             var _this2 = this;
 
-            return new ToggleButton(["Toggle opacity", "Toggle opacity"], "img/transparency.png", function () {
-                _this2.canvasEl.style.opacity = "1";
+            var ctx = this.canvasEl.getContext("2d");
+
+            return this.createButton("Redo", "img/redo.png", "y", function () {
+                if (_this2.stateIndex + 1 < _this2.undoActions.length) {
+                    _this2.stateIndex++;
+                    ctx.putImageData(_this2.undoActions[_this2.stateIndex], 0, 0);
+                }
+            });
+        }
+    }, {
+        key: "createOpacityToggleButton",
+        value: function createOpacityToggleButton() {
+            var _this3 = this;
+
+            return new ToggleButton(["Toggle opacity", "Toggle opacity"], "img/transparency.png", "o", function () {
+                _this3.canvasEl.style.opacity = "1";
             }, function () {
-                _this2.canvasEl.style.opacity = "";
+                _this3.canvasEl.style.opacity = "";
             });
         }
     }, {
@@ -60,7 +78,7 @@ var MapDiscoverer = (function () {
         value: function createCoverToggleButton() {
             var ctx = this.canvasEl.getContext("2d");
 
-            return new ToggleButton(["Cover Mode", "Uncover Mode"], "img/eraser.png", function () {
+            return new ToggleButton(["Uncover Mode", "Cover Mode"], "img/eraser.png", "c", function () {
                 ctx.globalCompositeOperation = "source-over";
             }, function () {
                 ctx.globalCompositeOperation = "destination-out";
@@ -68,62 +86,63 @@ var MapDiscoverer = (function () {
         }
     }, {
         key: "createButton",
-        value: function createButton(title, iconUrl, functionality) {
+        value: function createButton(title, iconUrl, accessKey, functionality) {
             var button = document.createElement("button"),
                 buttonImg = document.createElement("img");
             buttonImg.src = iconUrl;
             button.appendChild(buttonImg);
             button.appendChild(document.createTextNode(" " + title));
+            button.accessKey = accessKey;
             button.addEventListener("click", functionality);
             return button;
         }
     }, {
         key: "addCanvasHandlers",
         value: function addCanvasHandlers(canvasEl) {
-            var _this3 = this;
+            var _this4 = this;
 
             var ctx = this.canvasEl.getContext("2d"),
                 uiHintsCtx = this.uiHintsEl.getContext("2d");
 
             canvasEl.addEventListener("mousedown", function (evt) {
-                _this3.toolbox.currentTool.onStart(evt);
+                _this4.toolbox.currentTool.onStart(evt);
             }, false);
             canvasEl.addEventListener("mouseup", function (evt) {
-                _this3.toolbox.currentTool.onStop(evt);
+                _this4.toolbox.currentTool.onStop(evt);
                 // Take a snapshot of the canvasEl, for undo purposes
-                _this3.stateIndex++;
-                _this3.undoActions = _this3.undoActions.slice(0, _this3.stateIndex);
-                _this3.undoActions[_this3.stateIndex] = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
+                _this4.stateIndex++;
+                _this4.undoActions = _this4.undoActions.slice(0, _this4.stateIndex);
+                _this4.undoActions[_this4.stateIndex] = ctx.getImageData(0, 0, canvasEl.width, canvasEl.height);
             }, false);
             canvasEl.addEventListener("mousemove", function (evt) {
-                _this3.toolbox.currentTool.onMove(evt);
+                _this4.toolbox.currentTool.onMove(evt);
             }, false);
             canvasEl.addEventListener("mouseout", function () {
-                uiHintsCtx.clearRect(0, 0, _this3.uiHintsEl.width, _this3.uiHintsEl.height);
+                uiHintsCtx.clearRect(0, 0, _this4.uiHintsEl.width, _this4.uiHintsEl.height);
             });
         }
     }, {
         key: "addImageLoadHandler",
         value: function addImageLoadHandler(imgEl) {
-            var _this4 = this;
+            var _this5 = this;
 
             imgEl.addEventListener("load", function () {
-                _this4.canvasEl.height = imgEl.height;
-                _this4.canvasEl.width = imgEl.width;
-                var ctx = _this4.canvasEl.getContext("2d");
-                ctx.fillRect(0, 0, _this4.canvasEl.width, _this4.canvasEl.height);
+                _this5.canvasEl.height = imgEl.height;
+                _this5.canvasEl.width = imgEl.width;
+                var ctx = _this5.canvasEl.getContext("2d");
+                ctx.fillRect(0, 0, _this5.canvasEl.width, _this5.canvasEl.height);
 
-                _this4.uiHintsEl.height = imgEl.height;
-                _this4.uiHintsEl.width = imgEl.width;
-                var uiHintsCtx = _this4.uiHintsEl.getContext("2d");
-                uiHintsCtx.clearRect(0, 0, _this4.uiHintsEl.width, _this4.uiHintsEl.height);
+                _this5.uiHintsEl.height = imgEl.height;
+                _this5.uiHintsEl.width = imgEl.width;
+                var uiHintsCtx = _this5.uiHintsEl.getContext("2d");
+                uiHintsCtx.clearRect(0, 0, _this5.uiHintsEl.width, _this5.uiHintsEl.height);
 
-                _this4.stateIndex = 0;
-                _this4.undoActions = [ctx.getImageData(0, 0, _this4.canvasEl.width, _this4.canvasEl.height)];
+                _this5.stateIndex = 0;
+                _this5.undoActions = [ctx.getImageData(0, 0, _this5.canvasEl.width, _this5.canvasEl.height)];
                 imgEl.style.visibility = "";
 
-                _this4.opacityToggle.disable();
-                _this4.coverToggle.disable();
+                _this5.opacityToggle.disable();
+                _this5.coverToggle.disable();
             });
         }
     }, {
@@ -147,7 +166,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ToggleButton = (function () {
-    function ToggleButton(_ref, imageUrl, enableF, disableF) {
+    function ToggleButton(_ref, imageUrl, accessKey, enableF, disableF) {
         var _ref2 = _slicedToArray(_ref, 2);
 
         var titleDisabled = _ref2[0];
@@ -166,6 +185,7 @@ var ToggleButton = (function () {
 
         var buttonImage = document.createElement("img");
         buttonImage.src = imageUrl;
+        this.domElement.accessKey = accessKey;
         this.domElement.dataset.enabled = "false";
         this.domElement.appendChild(buttonImage);
         this.domElement.appendChild(this.buttonText);
@@ -259,6 +279,8 @@ var Toolbox = (function () {
     }, {
         key: "createToolButton",
         value: function createToolButton(tool) {
+            var _this = this;
+
             var toolClass = tool.constructor,
                 buttonDomEl = document.createElement("button"),
                 toolIconEl = document.createElement("img"),
@@ -267,9 +289,12 @@ var Toolbox = (function () {
             toolIconEl.src = "img/" + toolClass.img;
             toolIconEl.alt = "";
 
+            buttonDomEl.accessKey = toolClass.accessKey;
             buttonDomEl.appendChild(toolIconEl);
             buttonDomEl.appendChild(document.createTextNode(" " + toolClass.title));
             buttonDomEl.addEventListener("click", function () {
+                var uiHintsCtx = _this.uiHints.getContext("2d");
+                uiHintsCtx.clearRect(0, 0, _this.uiHints.width, _this.uiHints.height);
                 self.currentTool = tool;
                 var _iteratorNormalCompletion2 = true;
                 var _didIteratorError2 = false;
@@ -407,6 +432,7 @@ var PencilTool = (function () {
 
 PencilTool.title = "Pencil Tool";
 PencilTool.img = "pencil.png";
+PencilTool.accessKey = "p";
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -432,6 +458,7 @@ var RectangleTool = (function () {
             this.initialX = _ref2[0];
             this.initialY = _ref2[1];
 
+            this.clearUiHints();
             this.started = true;
         }
     }, {
@@ -440,12 +467,13 @@ var RectangleTool = (function () {
             var offsetX = _ref3.offsetX;
             var offsetY = _ref3.offsetY;
 
+            this.clearUiHints();
+
             if (this.started) {
                 var origStrokeStyle = this.uiHintsLayerCtx.strokeStyle;
 
                 this.uiHintsLayerCtx.strokeStyle = "blue";
 
-                this.clearUiHints();
                 this.uiHintsLayerCtx.lineWidth = 1;
                 this.uiHintsLayerCtx.beginPath();
                 this.uiHintsLayerCtx.rect(this.initialX, this.initialY, offsetX - this.initialX, offsetY - this.initialY);
@@ -482,3 +510,4 @@ var RectangleTool = (function () {
 
 RectangleTool.title = "Rectangle Tool";
 RectangleTool.img = "rectangle.png";
+RectangleTool.accessKey = "r";
