@@ -82,7 +82,8 @@ var MapDiscoverer = (function () {
         value: function addCanvasHandlers(canvasEl) {
             var _this3 = this;
 
-            var ctx = this.canvasEl.getContext("2d");
+            var ctx = this.canvasEl.getContext("2d"),
+                uiHintsCtx = this.uiHintsEl.getContext("2d");
 
             canvasEl.addEventListener("mousedown", function (evt) {
                 _this3.toolbox.currentTool.onStart(evt);
@@ -97,6 +98,9 @@ var MapDiscoverer = (function () {
             canvasEl.addEventListener("mousemove", function (evt) {
                 _this3.toolbox.currentTool.onMove(evt);
             }, false);
+            canvasEl.addEventListener("mouseout", function () {
+                uiHintsCtx.clearRect(0, 0, _this3.uiHintsEl.width, _this3.uiHintsEl.height);
+            });
         }
     }, {
         key: "addImageLoadHandler",
@@ -322,10 +326,12 @@ var _createClass = (function () { function defineProperties(target, props) { for
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 var PencilTool = (function () {
-    function PencilTool(canvas /*, uiHintsLayer*/) {
+    function PencilTool(canvas, uiHintsLayer) {
         _classCallCheck(this, PencilTool);
 
         this.ctx = canvas.getContext('2d');
+        this.uiHintsLayer = uiHintsLayer;
+        this.uiHintsCtx = this.uiHintsLayer.getContext('2d');
         this.started = false;
     }
 
@@ -343,6 +349,8 @@ var PencilTool = (function () {
             this.ctx.fill();
             this.ctx.closePath();
 
+            this.clearUiHints();
+
             this.lastX = offsetX;
             this.lastY = offsetY;
         }
@@ -352,25 +360,45 @@ var PencilTool = (function () {
             var offsetX = _ref2.offsetX;
             var offsetY = _ref2.offsetY;
 
-            if (!this.started) {
-                return;
+            if (this.started) {
+                this.ctx.lineCap = 'round';
+                this.ctx.lineWidth = 40;
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                this.ctx.lineTo(offsetX, offsetY);
+                this.ctx.stroke();
+                this.ctx.closePath();
+
+                this.lastX = offsetX;
+                this.lastY = offsetY;
+            } else {
+                this.clearUiHints();
+                this.drawCircleHint(offsetX, offsetY);
             }
-
-            this.ctx.lineCap = 'round';
-            this.ctx.lineWidth = 40;
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.lastX, this.lastY);
-            this.ctx.lineTo(offsetX, offsetY);
-            this.ctx.stroke();
-            this.ctx.closePath();
-
-            this.lastX = offsetX;
-            this.lastY = offsetY;
         }
     }, {
         key: 'onStop',
-        value: function onStop() /*evt*/{
+        value: function onStop(_ref3) {
+            var offsetX = _ref3.offsetX;
+            var offsetY = _ref3.offsetY;
+
             this.started = false;
+
+            this.drawCircleHint(offsetX, offsetY);
+        }
+    }, {
+        key: 'clearUiHints',
+        value: function clearUiHints() {
+            this.uiHintsCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
+        }
+    }, {
+        key: 'drawCircleHint',
+        value: function drawCircleHint(x, y) {
+            this.uiHintsCtx.strokeStyle = "blue";
+            this.uiHintsCtx.beginPath();
+            this.uiHintsCtx.arc(x, y, 20, Math.PI / 180 * 0, Math.PI / 180 * 360, false);
+            this.uiHintsCtx.stroke();
+            this.uiHintsCtx.closePath();
         }
     }]);
 
@@ -417,7 +445,7 @@ var RectangleTool = (function () {
 
                 this.uiHintsLayerCtx.strokeStyle = "blue";
 
-                this.uiHintsLayerCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
+                this.clearUiHints();
                 this.uiHintsLayerCtx.lineWidth = 1;
                 this.uiHintsLayerCtx.beginPath();
                 this.uiHintsLayerCtx.rect(this.initialX, this.initialY, offsetX - this.initialX, offsetY - this.initialY);
@@ -432,7 +460,7 @@ var RectangleTool = (function () {
             var offsetX = _ref4.offsetX;
             var offsetY = _ref4.offsetY;
 
-            this.uiHintsLayerCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
+            this.clearUiHints();
 
             this.ctx.lineWidth = 1;
             this.ctx.beginPath();
@@ -441,6 +469,11 @@ var RectangleTool = (function () {
             this.ctx.stroke();
 
             this.started = false;
+        }
+    }, {
+        key: "clearUiHints",
+        value: function clearUiHints() {
+            this.uiHintsLayerCtx.clearRect(0, 0, this.uiHintsLayer.width, this.uiHintsLayer.height);
         }
     }]);
 
